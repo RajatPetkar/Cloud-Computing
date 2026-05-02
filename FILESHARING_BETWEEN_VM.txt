@@ -1,0 +1,127 @@
+Step 1: Create Virtual Network (VNet)
+Azure → Virtual Network → Create
+Name: myVNet
+Address space: 10.0.0.0/16
+Subnet: 10.0.1.0/24
+
+Step 2: Create VM1
+Name: vm1
+OS: Ubuntu
+Authentication: SSH key
+Public IP: ✅ Enabled
+VNet: myVNet
+
+Step 3: Create VM2
+Name: vm2
+Same settings
+Same VNet + Subnet
+Public IP: ✅ (for initial access)
+
+Step 4: Configure Networking Rules
+
+Go to Network Security Group (NSG):
+
+Allow:
+Port 22 (SSH) → from your IP
+
+
+
+PART 2: Access Both VMs
+🔹 Connect to VM1
+ssh -i key.pem azureuser@<VM1_PUBLIC_IP>
+🔹 Connect to VM2
+ssh -i key.pem azureuser@<VM2_PUBLIC_IP>
+
+PART 3: Get Private IPs (IMPORTANT)
+
+Run on both VMs:
+ip a
+
+Example:
+VM1 → 10.0.1.4
+VM2 → 10.0.1.5
+
+PART 4: Setup Key-Based Access Between VMs
+🔹 Step 1: Generate SSH key on VM1
+
+(On VM1)
+
+ssh-keygen -t rsa -b 4096
+
+Step 2: Copy key to VM2
+
+(On VM1)
+
+ssh-copy-id azureuser@10.0.1.5
+
+Step 3: Test connection (VM1 → VM2)
+ssh azureuser@10.0.1.5
+
+PART 5: Secure File Transfer
+🔹 Create file on VM1
+echo "Hello from VM1" > file.txt
+
+Transfer file (VM1 → VM2)
+scp file.txt azureuser@10.0.1.5:/home/azureuser/
+
+Verify on VM2
+
+(On VM2)
+
+ls
+cat file.txt
+
+
+
+
+
+OR -------------------------------------------------
+
+🔹 Step 1: From VM1, connect to VM2
+
+Run this on VM1:
+
+ssh azureuser@10.1.0.5
+
+👉 Enter VM2 password
+
+🔹 Step 2: Test connection
+
+If login works → ✅ your network is correct
+
+📂 Step 3: Transfer File (Main Task)
+🔹 Create file on VM1
+echo "Hello from VM1" > file.txt
+🔹 Send file to VM2
+scp file.txt azureuser@10.1.0.5:/home/azureuser/
+
+👉 Enter password
+
+🔹 Verify on VM2
+
+Login to VM2:
+
+ls
+cat file.txt
+🔐 Step 4: Apply Permissions (IMPORTANT for marks)
+
+On VM2:
+
+chmod 600 file.txt
+
+👉 Only owner can read/write
+
+🔑 Step 5 (Optional but HIGH VALUE): Passwordless SSH
+
+On VM1:
+
+ssh-keygen -t rsa -b 4096
+
+Then:
+
+ssh-copy-id azureuser@10.1.0.5
+
+Now test:
+
+ssh azureuser@10.1.0.5
+

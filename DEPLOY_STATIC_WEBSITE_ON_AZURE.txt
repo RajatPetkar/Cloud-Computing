@@ -1,0 +1,31 @@
+Step 1: Create a VM on Microsoft Azure
+Step 2: Configure Networking
+Step 3: Connect to VM
+	3.1 Using ssh key 
+		chmod 400 your-key.pem
+		ssh -i your-key.pem azureuser@<public-ip>
+	3.2 Using Password Authentication
+		ssh username@your-public-ip
+
+Step 4: Install Web Server (Nginx)
+	sudo apt update
+	sudo apt install nginx -y
+
+Step 5: Deploy Your Static Website
+	cd /var/www/html
+	sudo rm index.nginx-debian.html
+	sudo nano index.html
+
+Step 6: Upload Files Remotely
+	Use:
+
+	6.1 SCP:
+		scp -r ./mywebsite username@your-ip:/var/www/html
+
+	6.2 Git:
+		git clone your-repo
+
+
+Run this before using nano:
+export TERM=xterm
+sudo chmod -R 755 /var/www/html

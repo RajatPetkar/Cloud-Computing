@@ -1,0 +1,24 @@
+Step 1: Create Static Web App
+	Go to:
+	Azure Portal → Static Web Apps → Create
+Step 2: Connect GitHub
+	Link your GitHub repo
+	Select:
+		Branch: main
+		App location: / (or your folder)
+		Output location: / (for plain HTML)
+Step 3: Deployment Happens Automatically
+
+	Every push to GitHub:
+
+		Auto build
+		Auto deploy
+		Live URL generated
+Step 4: Update Website
+
+	Just:
+		git push
+
+
+Run this before using nano:
+export TERM=xterm
