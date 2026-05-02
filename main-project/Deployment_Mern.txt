@@ -1,0 +1,96 @@
+Step 1 — Clone the repository
+
+Step 2 — Backend setup
+	cd backend
+	npm install
+	cp .env.example .env
+	npm run dev
+
+	Verify it works:
+	curl http://localhost:5000/api/health
+
+Step 3 — Frontend setup
+	cd frontend
+	npm install
+	cp .env.example .env
+	VITE_API_URL=http://your_vm_ip/api //here while deploying don't put PORT No. in url
+	npm run dev
+
+
+## AWS EC2 Deployment || AZURE
+
+1. Login your Account & Create VM 
+2. Install Required Software on EC2
+	sudo apt update
+	sudo apt upgrade -y
+	sudo apt install -y nodejs npm git nginx
+	sudo npm install -g pm2
+
+3. Clone repo (Build the Backend (run))
+	Start backend with PM2 (production process manager)
+		pm2 start server.js --name "edutrack-backend"
+		pm2 status
+		pm2 logs edutrack-backend --lines 20
+		pm2 save
+		pm2 startup
+		
+4. Build the Frontend
+	ls dist/index.html // it must be present after build
+
+5. Fix File Permissions for Nginx
+	sudo chmod 755 /home/ubuntu
+	sudo chmod -R 755 /home/ubuntu/student-record-system/frontend/dist
+	ls -la /home/ubuntu
+	
+	# Test Nginx can actually read the file
+		sudo -u www-data cat /home/ubuntu/student-record-system/frontend/dist/index.html
+
+6. Configure Nginx
+	sudo nano /etc/nginx/sites-available/name of your project
+	
+server {
+    listen 80;
+    server_name <YOUR_EC2_PUBLIC_IP>;
+
+    # Serve React frontend static files
+    root /home/ubuntu/student-record-system/frontend/dist;
+    index index.html;
+
+    # React Router SPA fallback — all unknown routes serve index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy all /api requests to Node.js backend on port 5000
+    location /api {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+SAVE AND EXIT
+
+# Remove the default Nginx site to avoid conflicts
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Test Nginx configuration for syntax errors
+sudo nginx -t
+
+# Reload Nginx to apply the new configuration
+sudo systemctl reload nginx
+
+# Enable Nginx to start automatically on server reboot
+sudo systemctl enable nginx
+
+# Verify Nginx is running
+sudo systemctl status nginx
+
+
+Check if its working
+Now open http://<YOUR_EC2_PUBLIC_IP>
