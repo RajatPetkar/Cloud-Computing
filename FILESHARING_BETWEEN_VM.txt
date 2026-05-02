@@ -32,42 +32,19 @@ ssh -i key.pem azureuser@<VM1_PUBLIC_IP>
 🔹 Connect to VM2
 ssh -i key.pem azureuser@<VM2_PUBLIC_IP>
 
-PART 3: Get Private IPs (IMPORTANT)
+PART 3 : Copy the key from your local machine to vm1
+scp key.pem key.pem azureuser@10.0.1.5:/home/azureuser/
+chmod 400 key.pem
 
-Run on both VMs:
-ip a
+PART 4 : TEST CONNECTION 
+ssh -i key.pem azureuser@<VM2_PRIVATE_IP>
 
-Example:
-VM1 → 10.0.1.4
-VM2 → 10.0.1.5
-
-PART 4: Setup Key-Based Access Between VMs
-🔹 Step 1: Generate SSH key on VM1
-
-(On VM1)
-
-ssh-keygen -t rsa -b 4096
-
-Step 2: Copy key to VM2
-
-(On VM1)
-
-ssh-copy-id azureuser@10.0.1.5
-
-Step 3: Test connection (VM1 → VM2)
-ssh azureuser@10.0.1.5
-
-PART 5: Secure File Transfer
 🔹 Create file on VM1
 echo "Hello from VM1" > file.txt
-
-Transfer file (VM1 → VM2)
-scp file.txt azureuser@10.0.1.5:/home/azureuser/
+🔹 Transfer file (VM1 → VM2)
+scp -i key.pem file.txt azureuser@<VM2_PRIVATE_IP>:/home/azureuser/
 
 Verify on VM2
-
-(On VM2)
-
 ls
 cat file.txt
 
@@ -75,7 +52,7 @@ cat file.txt
 
 
 
-OR -------------------------------------------------
+------------------------------------------------------- OR -------------------------------------------------
 
 🔹 Step 1: From VM1, connect to VM2
 
@@ -110,17 +87,6 @@ On VM2:
 chmod 600 file.txt
 
 👉 Only owner can read/write
-
-🔑 Step 5 (Optional but HIGH VALUE): Passwordless SSH
-
-On VM1:
-
-ssh-keygen -t rsa -b 4096
-
-Then:
-
-ssh-copy-id azureuser@10.1.0.5
-
 Now test:
 
 ssh azureuser@10.1.0.5
