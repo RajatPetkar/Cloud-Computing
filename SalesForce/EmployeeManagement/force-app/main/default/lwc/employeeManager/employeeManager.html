@@ -1,0 +1,267 @@
+<template>
+    <lightning-card>
+        <div class="card-header" slot="title">
+            <lightning-icon icon-name="standard:employee" size="small" class="header-icon"></lightning-icon>
+            <span class="header-title">Employee Directory</span>
+        </div>
+
+        <!-- Search & Controls Bar -->
+        <div class="controls-bar" slot="actions">
+            <lightning-input
+                type="search"
+                placeholder="Search employees..."
+                value={searchTerm}
+                onchange={handleSearch}
+                class="search-input"
+            ></lightning-input>
+            <lightning-button-icon
+                icon-name="utility:add"
+                variant="brand"
+                title="New Employee"
+                onclick={handleNewEmployee}
+                class="add-btn"
+            ></lightning-button-icon>
+        </div>
+
+        <div class="main-container">
+
+            <!-- Loading Spinner -->
+            <template if:true={isLoading}>
+                <div class="spinner-wrapper">
+                    <lightning-spinner alternative-text="Loading" size="medium" variant="brand"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- Error State -->
+            <template if:true={hasError}>
+                <div class="error-state">
+                    <lightning-icon icon-name="utility:error" size="large" variant="error"></lightning-icon>
+                    <p class="error-text">{errorMessage}</p>
+                    <lightning-button label="Retry" onclick={loadEmployees} variant="brand"></lightning-button>
+                </div>
+            </template>
+
+            <!-- Empty State -->
+            <template if:true={isEmpty}>
+                <div class="empty-state">
+                    <lightning-icon icon-name="standard:people" size="large"></lightning-icon>
+                    <h3 class="empty-title">No Employees Found</h3>
+                    <p class="empty-subtitle">Try adjusting your search or add a new employee.</p>
+                </div>
+            </template>
+
+            <!-- Employee Table -->
+            <template if:true={hasData}>
+                <div class="table-wrapper">
+                    <table class="emp-table">
+                        <thead>
+                            <tr>
+                                <th onclick={handleSort} data-field="Employee_ID__c" class="sortable-header">
+                                    <span>Emp ID</span>
+                                    <template if:true={isSortedByEmpId}>
+                                        <lightning-icon icon-name={sortIcon} size="xx-small" class="sort-icon"></lightning-icon>
+                                    </template>
+                                </th>
+                                <th onclick={handleSort} data-field="Name" class="sortable-header">
+                                    <span>Name</span>
+                                    <template if:true={isSortedByName}>
+                                        <lightning-icon icon-name={sortIcon} size="xx-small" class="sort-icon"></lightning-icon>
+                                    </template>
+                                </th>
+                                <th>Department</th>
+                                <th>Email</th>
+                                <th onclick={handleSort} data-field="Joining_Date__c" class="sortable-header">
+                                    <span>Joining Date</span>
+                                    <template if:true={isSortedByDate}>
+                                        <lightning-icon icon-name={sortIcon} size="xx-small" class="sort-icon"></lightning-icon>
+                                    </template>
+                                </th>
+                                <th>Salary</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={filteredEmployees} for:item="emp">
+                                <tr key={emp.Id} class="emp-row">
+                                    <td>
+                                        <span class="emp-id-badge">{emp.Employee_ID__c}</span>
+                                    </td>
+                                    <td>
+                                        <div class="name-cell">
+                                            <div class="avatar">{emp.initials}</div>
+                                            <span class="emp-name">{emp.Name}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class={emp.deptClass}>{emp.Department__c}</span>
+                                    </td>
+                                    <td>
+                                        <a href={emp.mailtoLink} class="email-link">{emp.Email__c}</a>
+                                    </td>
+                                    <td class="date-cell">{emp.formattedDate}</td>
+                                    <td>
+                                        <span class="salary-cell">{emp.formattedSalary}</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <lightning-button-icon
+                                                icon-name="utility:edit"
+                                                size="x-small"
+                                                variant="border-filled"
+                                                title="Edit"
+                                                data-id={emp.Id}
+                                                onclick={handleEdit}
+                                            ></lightning-button-icon>
+                                            <lightning-button-icon
+                                                icon-name="utility:delete"
+                                                size="x-small"
+                                                variant="border-filled"
+                                                title="Delete"
+                                                data-id={emp.Id}
+                                                onclick={handleDelete}
+                                                class="delete-btn"
+                                            ></lightning-button-icon>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <span class="pagination-info">{paginationLabel}</span>
+                    <div class="pagination-btns">
+                        <lightning-button-icon
+                            icon-name="utility:chevronleft"
+                            size="small"
+                            disabled={isFirstPage}
+                            onclick={handlePrevPage}
+                            title="Previous"
+                        ></lightning-button-icon>
+                        <lightning-button-icon
+                            icon-name="utility:chevronright"
+                            size="small"
+                            disabled={isLastPage}
+                            onclick={handleNextPage}
+                            title="Next"
+                        ></lightning-button-icon>
+                    </div>
+                </div>
+            </template>
+
+        </div>
+    </lightning-card>
+
+    <!-- Create / Edit Modal -->
+    <template if:true={showModal}>
+        <section class="modal-backdrop" role="dialog" aria-modal="true">
+            <div class="modal-container">
+                <header class="modal-header">
+                    <h2 class="modal-title">{modalTitle}</h2>
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        variant="bare"
+                        onclick={handleModalClose}
+                        class="modal-close"
+                    ></lightning-button-icon>
+                </header>
+
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <lightning-input
+                            label="Employee Name"
+                            value={currentRecord.Name}
+                            data-field="Name"
+                            onchange={handleFieldChange}
+                            required
+                            class="form-field"
+                        ></lightning-input>
+
+                        <lightning-input
+                            label="Employee ID"
+                            type="number"
+                            value={currentRecord.Employee_ID__c}
+                            data-field="Employee_ID__c"
+                            onchange={handleFieldChange}
+                            required
+                            class="form-field"
+                        ></lightning-input>
+
+                        <lightning-combobox
+                            label="Department"
+                            value={currentRecord.Department__c}
+                            options={departmentOptions}
+                            data-field="Department__c"
+                            onchange={handleFieldChange}
+                            class="form-field"
+                        ></lightning-combobox>
+
+                        <lightning-input
+                            label="Email"
+                            type="email"
+                            value={currentRecord.Email__c}
+                            data-field="Email__c"
+                            onchange={handleFieldChange}
+                            class="form-field"
+                        ></lightning-input>
+
+                        <lightning-input
+                            label="Joining Date"
+                            type="date"
+                            value={currentRecord.Joining_Date__c}
+                            data-field="Joining_Date__c"
+                            onchange={handleFieldChange}
+                            class="form-field"
+                        ></lightning-input>
+
+                        <lightning-input
+                            label="Salary"
+                            type="number"
+                            formatter="currency"
+                            value={currentRecord.Salary__c}
+                            data-field="Salary__c"
+                            onchange={handleFieldChange}
+                            class="form-field"
+                        ></lightning-input>
+                    </div>
+                </div>
+
+                <footer class="modal-footer">
+                    <lightning-button
+                        label="Cancel"
+                        onclick={handleModalClose}
+                        class="cancel-btn"
+                    ></lightning-button>
+                    <lightning-button
+                        label={saveLabel}
+                        variant="brand"
+                        onclick={handleSave}
+                        disabled={isSaving}
+                        class="save-btn"
+                    ></lightning-button>
+                </footer>
+            </div>
+        </section>
+    </template>
+
+    <!-- Delete Confirm Modal -->
+    <template if:true={showDeleteConfirm}>
+        <section class="modal-backdrop" role="dialog">
+            <div class="modal-container modal-sm">
+                <header class="modal-header">
+                    <h2 class="modal-title danger-title">Confirm Delete</h2>
+                </header>
+                <div class="modal-body">
+                    <p class="confirm-text">Are you sure you want to delete this employee? This action cannot be undone.</p>
+                </div>
+                <footer class="modal-footer">
+                    <lightning-button label="Cancel" onclick={handleCancelDelete}></lightning-button>
+                    <lightning-button label="Delete" variant="destructive" onclick={handleConfirmDelete}></lightning-button>
+                </footer>
+            </div>
+        </section>
+    </template>
+
+</template>
