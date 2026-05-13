@@ -1,0 +1,47 @@
+// INSTALLATION PART 
+sudo apt update
+sudo snap install code --classic
+sudo apt install nodejs npm -y
+
+sudo apt install default-jdk -y
+
+sudo npm install -g @salesforce/cli
+sf --version
+
+Install Salesforce Extensions (INSIDE VS CODE) FROM OFFICIAL SALESFORCE
+
+PART 3 — CREATE PROJECT
+sf project generate --name EmployeeManagement
+cd EmployeeManagement
+
+PART 4 — LOGIN TO SALESFORCE
+sf org login web --alias myorg --set-default
+sf org list     
+sf config set target-org="rajatpetkar250.554216c7553a@agentforce.com"
+
+PART 5 — CREATE FILES
+sf apex generate class --name EmployeeController --output-dir force-app/main/default/classes
+
+Create LWC
+sf lightning generate component --type lwc --name employeeManager --output-dir force-app/main/default/lwc
+
+EDIT THE CODES THEN DONE(apex,html,js,xml,)
+
+PART 11 — DEPLOY
+sf project deploy start
+
+PART 12 — CREATE APP PAGE
+Setup → Lightning App Builder
+Click:
+New
+App Page
+Name → Employee Management
+
+Drag:
+employeeManager
+
+PART 13 — VIEW APP
+Click:
+9 dots (App Launcher)\
+Search:
+Employee Management
