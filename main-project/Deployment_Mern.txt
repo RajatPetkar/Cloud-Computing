@@ -21,7 +21,6 @@ Step 2 — Backend setup
 Step 3 — Frontend setup
 	cd frontend
 	npm install
-	cp .env.example .env
 	VITE_API_URL=http://your_vm_ip/api //here while deploying don't put PORT No. in url
 	npm run dev
 
