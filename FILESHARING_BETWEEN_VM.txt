@@ -49,9 +49,6 @@ ls
 cat file.txt
 
 
-
-
-
 ------------------------------------------------------- OR -------------------------------------------------
 
 🔹 Step 1: From VM1, connect to VM2
@@ -80,14 +77,3 @@ Login to VM2:
 
 ls
 cat file.txt
-🔐 Step 4: Apply Permissions (IMPORTANT for marks)
-
-On VM2:
-
-chmod 600 file.txt
-
-👉 Only owner can read/write
-Now test:
-
-ssh azureuser@10.1.0.5
-
