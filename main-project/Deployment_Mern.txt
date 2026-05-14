@@ -11,8 +11,6 @@ Step 2 — Backend setup
 	npm install
 	npm run dev
 
-	Verify it works:
-	curl http://localhost:5000/api/health
 	Start backend with PM2 (production process manager)
 		pm2 start server.js --name "project_name"
 		pm2 status
