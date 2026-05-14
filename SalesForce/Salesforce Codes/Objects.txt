@@ -1,0 +1,48 @@
+Student Object :- 
+
+Field Label        Field Name	         Data Type
+Department	       Department__c	     Picklist		
+Email	             Email__c	           Email (Unique)	
+Joining Date	     Joining_Date__c	   Date		
+Marks	             Marks__c	           Number(18, 0)	
+Roll Number	       Roll_Number__c	     Number(18, 0)	
+Student Name	     Name	               Text(80)
+
+
+Faculty Object :-
+
+Field Label        Field Name	          Data Type	
+Department	       Department__c	      Picklist		
+Email	             Email__c	            Email (Unique)		
+Faculty Name	     Name	                Text(80)		
+ID	               ID__c	              Number(18, 0) (Unique)		
+Joining Date	     Joining_Date__c	    Date		
+Salary	           Salary__c	          Currency(18, 0)
+
+Employee Object :- 
+
+Field Label        Field Name	          Data Type	
+Department	       Department__c	      Picklist	
+Email	             Email__c	            Email		
+Employee ID	       Employee_ID__c	      Number(18, 0) (Unique)	
+Employee Name	     Name	                Text(80)		
+Joining Date	     Joining_Date__c	    Date		
+Salary	           Salary__c	          Currency(18, 0)
+
+Product object :- 
+
+Field Label        Field Name	          Data Type	
+Expiry_Date	       Expiry_Date__c	      Date		
+Manufacture_Date	 Manufacture_Date__c  Date		
+Product Name	     Name	                Text(80)		
+Serial_No	         Serial_NO__c	        Text(20) (Unique Case Insensitive)
+
+Customer Object :- 
+
+Field Label        Field Name	          Data Type	
+Birth_Date	       Birth_Date__c	      Date			
+Customer Name	     Name	                Text(80)		
+Department	       Department__c	      Text(10)	
+Email	             Email__c	            Email (Unique)	
+Emp_ID	           Emp_ID__c	          Number(18, 0)		
+
