@@ -1,0 +1,125 @@
+public class EmployeeManagementSystem {
+
+    // ADD EMPLOYEE
+    public static void addEmployee(Integer empId,
+                                   String empName,
+                                   String email,
+                                   Date joiningDate,
+                                   String department,
+                                   Decimal salary) {
+
+        Employee__c emp = new Employee__c();
+
+        emp.Employee_ID__c = empId;
+        emp.Name = empName;
+        emp.Email__c = email;
+        emp.Joining_Date__c = joiningDate;
+        emp.Department__c = department;
+        emp.Salary__c = salary;
+
+        insert emp;
+
+        System.debug('Employee Added Successfully');
+    }
+
+    // VIEW EMPLOYEES
+    public static void viewEmployees() {
+
+        List<Employee__c> empList = [
+            SELECT Id,
+                   Name,
+                   Employee_ID__c,
+                   Email__c,
+                   Joining_Date__c,
+                   Department__c,
+                   Salary__c
+            FROM Employee__c
+        ];
+
+        System.debug('===== EMPLOYEE LIST =====');
+
+        for(Employee__c emp : empList) {
+
+            System.debug(
+                'Employee ID: ' + emp.Employee_ID__c +
+                ' | Name: ' + emp.Name +
+                ' | Email: ' + emp.Email__c +
+                ' | Joining Date: ' + emp.Joining_Date__c +
+                ' | Department: ' + emp.Department__c +
+                ' | Salary: ' + emp.Salary__c
+            );
+        }
+    }
+
+    // UPDATE DEPARTMENT
+    public static void updateDepartment(Integer empId,
+                                        String newDepartment) {
+
+        List<Employee__c> empList = [
+            SELECT Id,
+                   Department__c
+            FROM Employee__c
+            WHERE Employee_ID__c = :empId
+            LIMIT 1
+        ];
+
+        if(empList.size() > 0) {
+
+            empList[0].Department__c = newDepartment;
+
+            update empList[0];
+
+            System.debug('Department Updated Successfully');
+
+        } else {
+
+            System.debug('Employee Not Found');
+        }
+    }
+
+    // DELETE EMPLOYEE
+    public static void deleteEmployee(Integer empId) {
+
+        List<Employee__c> empList = [
+            SELECT Id
+            FROM Employee__c
+            WHERE Employee_ID__c = :empId
+            LIMIT 1
+        ];
+
+        if(empList.size() > 0) {
+
+            delete empList[0];
+
+            System.debug('Employee Deleted Successfully');
+
+        } else {
+
+            System.debug('Employee Not Found');
+        }
+    }
+
+
+// EXECUTION CMDS
+
+Add Employee
+EmployeeManagementSystem.addEmployee(
+    101,
+    'Rajat Patil',
+    'rajat@gmail.com',
+    Date.newInstance(2025, 5, 14),
+    'IT',
+    50000
+);
+
+View All Employees
+EmployeeManagementSystem.viewEmployees();
+
+Update Department
+EmployeeManagementSystem.updateDepartment(
+    101,
+    'Computer Engineering'
+);
+
+Delete Employee
+EmployeeManagementSystem.deleteEmployee(101);

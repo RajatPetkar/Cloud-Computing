@@ -1,0 +1,55 @@
+public class ConsoleEmailService {
+
+    // Without attachment
+    public static void sendSimpleEmail(String toAddress, String subject, String body) {
+
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        mail.setToAddresses(new String[] { toAddress });
+        mail.setSubject(subject);
+        mail.setPlainTextBody(body);
+
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+
+        System.debug('Simple email sent!');
+    }
+
+    // With attachment
+    public static void sendEmailWithAttachment(String toAddress, String subject, String body,
+                                               String fileName, String fileContent) {
+
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        mail.setToAddresses(new String[] { toAddress });
+        mail.setSubject(subject);
+        mail.setPlainTextBody(body);
+
+        Messaging.EmailFileAttachment attachment = new Messaging.EmailFileAttachment();
+        attachment.setFileName(fileName);
+        attachment.setBody(Blob.valueOf(fileContent));
+        attachment.setContentType('text/plain');
+
+        mail.setFileAttachments(new Messaging.EmailFileAttachment[] { attachment });
+
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+
+        System.debug('Email with attachment sent!');
+    }
+}
+
+
+//Execution commands
+
+Simple Email (Without Attachment)
+ConsoleEmailService.sendSimpleEmail(
+    'yourmail@gmail.com',
+    'Test Subject',
+    'Hello from Salesforce Apex!'
+);
+
+Email With Attachment
+ConsoleEmailService.sendEmailWithAttachment(
+    'yourmail@gmail.com',
+    'Attachment Test',
+    'This email contains attachment.',
+    'sample.txt',
+    'Hello this is file content from Salesforce Apex.'
+);

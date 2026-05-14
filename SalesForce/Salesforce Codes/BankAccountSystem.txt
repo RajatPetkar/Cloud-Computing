@@ -1,0 +1,122 @@
+public class BankAccountSystem {
+
+    // CREATE CUSTOMER
+    public static void addCustomer(Integer empId,
+                                   String empName,
+                                   String email,
+                                   Date birthDate,
+                                   String department) {
+
+        Customer__c c = new Customer__c();
+
+        c.Emp_ID__c = empId;
+        c.Name = empName;
+        c.Email__c = email;
+        c.Birth_Date__c = birthDate;
+        c.Department__c = department;
+
+        insert c;
+
+        System.debug('Customer Added Successfully');
+    }
+
+    // DISPLAY ALL CUSTOMERS
+    public static void viewCustomers() {
+
+        List<Customer__c> customerList = [
+            SELECT Id,
+                   Name,
+                   Emp_ID__c,
+                   Email__c,
+                   Birth_Date__c,
+                   Department__c
+            FROM Customer__c
+        ];
+
+        System.debug('===== CUSTOMER LIST =====');
+
+        for(Customer__c c : customerList) {
+
+            System.debug(
+                'Emp ID: ' + c.Emp_ID__c +
+                ' | Name: ' + c.Name +
+                ' | Email: ' + c.Email__c +
+                ' | Birth Date: ' + c.Birth_Date__c +
+                ' | Department: ' + c.Department__c
+            );
+        }
+    }
+
+    // DELETE CUSTOMER
+    public static void deleteCustomer(Integer empId) {
+
+        List<Customer__c> customerList = [
+            SELECT Id
+            FROM Customer__c
+            WHERE Emp_ID__c = :empId
+            LIMIT 1
+        ];
+
+        if(customerList.size() > 0) {
+
+            delete customerList[0];
+
+            System.debug('Customer Deleted Successfully');
+
+        } else {
+
+            System.debug('Customer Not Found');
+        }
+    }
+
+    // UPDATE CUSTOMER
+    public static void updateDepartment(Integer empId,
+                                        String newDepartment) {
+
+        List<Customer__c> customerList = [
+            SELECT Id,
+                   Department__c
+            FROM Customer__c
+            WHERE Emp_ID__c = :empId
+            LIMIT 1
+        ];
+
+        if(customerList.size() > 0) {
+
+            customerList[0].Department__c = newDepartment;
+
+            update customerList[0];
+
+            System.debug('Department Updated Successfully');
+
+        } else {
+
+            System.debug('Customer Not Found');
+        }
+    }
+}
+
+
+
+// EXECUTION CMD 
+
+Add Customer
+BankAccountSystem.addCustomer(
+    101,
+    'Rajat Patil',
+    'rajat@gmail.com',
+    Date.newInstance(2005, 5, 10),
+    'IT'
+);
+
+View All Customers
+BankAccountSystem.viewCustomers();
+
+Update Department
+BankAccountSystem.updateDepartment(
+    101,
+    'Computer Engineering'
+);
+
+Delete Customer
+BankAccountSystem.deleteCustomer(101);

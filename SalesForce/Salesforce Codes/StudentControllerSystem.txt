@@ -1,0 +1,274 @@
+public class StudentController {
+
+    public Student__c studentObj {get; set;}
+    public List<Student__c> studentList {get; set;}
+
+    public String searchKey {get; set;}
+
+    public Id deleteStudentId {get; set;}
+    public Id updateStudentId {get; set;}
+
+    public Boolean isEditMode {get; set;}
+
+    // Constructor
+    public StudentController() {
+
+        studentObj = new Student__c();
+
+        searchKey = '';
+
+        isEditMode = false;
+
+        loadStudents();
+    }
+
+    // Save Student
+    public void saveStudent() {
+
+        try {
+
+            insert studentObj;
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.CONFIRM,
+                    'Student Added Successfully'
+                )
+            );
+
+            studentObj = new Student__c();
+
+            loadStudents();
+
+        } catch(Exception e) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    e.getMessage()
+                )
+            );
+        }
+    }
+
+    // Load Students
+    public void loadStudents() {
+
+        String key = '%' + (searchKey == null ? '' : searchKey) + '%';
+
+        studentList = [
+
+            SELECT Id,
+                   Name,
+                   Roll_Number__c,
+                   Department__c,
+                   Email__c,
+                   Joining_Date__c,
+                   Marks__c
+
+            FROM Student__c
+
+            WHERE Name LIKE :key
+
+            ORDER BY CreatedDate DESC
+        ];
+    }
+
+    // Delete Student
+    public void deleteStudent() {
+
+        try {
+
+            if(deleteStudentId != null) {
+
+                delete new Student__c(Id = deleteStudentId);
+
+                ApexPages.addMessage(
+                    new ApexPages.Message(
+                        ApexPages.Severity.CONFIRM,
+                        'Student Deleted Successfully'
+                    )
+                );
+
+                loadStudents();
+            }
+
+        } catch(Exception e) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    e.getMessage()
+                )
+            );
+        }
+    }
+
+    // Edit Student
+    public void editStudent() {
+
+        if(updateStudentId != null) {
+
+            studentObj = [
+
+                SELECT Id,
+                       Name,
+                       Roll_Number__c,
+                       Department__c,
+                       Email__c,
+                       Joining_Date__c,
+                       Marks__c
+
+                FROM Student__c
+
+                WHERE Id = :updateStudentId
+
+                LIMIT 1
+            ];
+
+            isEditMode = true;
+        }
+    }
+
+    // Update Student
+    public void updateStudent() {
+
+        try {
+
+            update studentObj;
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.CONFIRM,
+                    'Student Updated Successfully'
+                )
+            );
+
+            studentObj = new Student__c();
+
+            isEditMode = false;
+
+            loadStudents();
+
+        } catch(Exception e) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    e.getMessage()
+                )
+            );
+        }
+    }
+}
+
+// VISUAL PAGE 
+
+<apex:page controller="StudentController">
+
+    <apex:form>
+
+        <apex:pageMessages id="msgs"/>
+
+        <!-- Add / Update Student -->
+        <apex:pageBlock title="Student Record Management System"
+                 id="studentForm">
+
+            <apex:pageBlockSection columns="1">
+
+                <apex:inputField value="{!studentObj.Name}"/>
+
+                <apex:inputField value="{!studentObj.Roll_Number__c}"/>
+
+                <apex:inputField value="{!studentObj.Department__c}"/>
+
+                <apex:inputField value="{!studentObj.Email__c}"/>
+
+                <apex:inputField value="{!studentObj.Joining_Date__c}"/>
+
+                <apex:inputField value="{!studentObj.Marks__c}"/>
+
+            </apex:pageBlockSection>
+
+            <!-- Save Button -->
+            <apex:commandButton value="Save Student"
+                                action="{!saveStudent}"
+                                rerender="studentTable,msgs"
+                                rendered="{!!isEditMode}"/>
+
+            <!-- Update Button -->
+            <apex:commandButton value="Update Student"
+                                action="{!updateStudent}"
+                                rerender="studentTable,msgs"
+                                rendered="{!isEditMode}"/>
+
+        </apex:pageBlock>
+
+        <br/>
+
+        <!-- Search Block -->
+ 
+        <br/>
+
+        <!-- Student List -->
+        <apex:pageBlock title="Student List" id="studentTable">
+
+            <apex:pageBlockTable value="{!studentList}" var="s">
+
+                <apex:column value="{!s.Name}"
+                             headerValue="Student Name"/>
+
+                <apex:column value="{!s.Roll_Number__c}"
+                             headerValue="Roll Number"/>
+
+                <apex:column value="{!s.Department__c}"
+                             headerValue="Department"/>
+
+                <apex:column value="{!s.Email__c}"
+                             headerValue="Email"/>
+
+                <apex:column value="{!s.Joining_Date__c}"
+                             headerValue="Joining Date"/>
+
+                <apex:column value="{!s.Marks__c}"
+                             headerValue="Marks"/>
+
+                <!-- Edit Button -->
+                <apex:column headerValue="Edit">
+
+                    <apex:commandButton value="Edit"
+                                        action="{!editStudent}"
+                                          rerender="studentForm,studentTable,msgs"
+                                        immediate="true">
+
+                        <apex:param name="editId"
+                                    value="{!s.Id}"
+                                    assignTo="{!updateStudentId}"/>
+
+                    </apex:commandButton>
+
+                </apex:column>
+
+                <!-- Delete Button -->
+                <apex:column headerValue="Delete">
+
+                    <apex:commandButton value="Delete"
+                                        action="{!deleteStudent}"
+                                        rerender="studentTable,msgs"
+                                        immediate="true">
+
+                        <apex:param name="deleteId"
+                                    value="{!s.Id}"
+                                    assignTo="{!deleteStudentId}"/>
+
+                    </apex:commandButton>
+
+                </apex:column>
+
+            </apex:pageBlockTable>
+
+        </apex:pageBlock>
+
+    </apex:form>
+
+</apex:page>

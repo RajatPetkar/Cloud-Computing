@@ -1,0 +1,108 @@
+<apex:page controller="EmailController">
+    <apex:form enctype="multipart/form-data">
+
+        <!-- Messages -->
+        <apex:pageMessages />
+
+        <apex:pageBlock title="Send Email Notification">
+
+            <apex:pageBlockSection columns="1">
+
+                <!-- Email -->
+                <apex:inputText value="{!toAddress}" label="Recipient Email" required="true"/>
+
+                <!-- Subject -->
+                <apex:inputText value="{!subject}" label="Subject" required="true"/>
+
+                <!-- Body -->
+                <apex:inputTextarea value="{!body}" label="Message Body" rows="5" required="true"/>
+
+                <!-- Attachment (FIXED) -->
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Attachment (Optional)" />
+                    <apex:inputFile value="{!fileBody}" filename="{!fileName}" />
+                </apex:pageBlockSectionItem>
+
+            </apex:pageBlockSection>
+
+            <!-- Button -->
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Send Email" action="{!sendEmail}" />
+            </apex:pageBlockButtons>
+
+        </apex:pageBlock>
+
+    </apex:form>
+</apex:page>
+
+
+// APEX
+
+public class EmailController {
+
+    // Form fields
+    public String toAddress { get; set; }
+    public String subject { get; set; }
+    public String body { get; set; }
+
+    // File upload
+    public Blob fileBody { get; set; }
+    public String fileName { get; set; }
+
+    /**
+     * Email validation method
+     */
+    public Boolean isValidEmail(String email) {
+        if (String.isBlank(email)) return false;
+
+        Pattern pattern = Pattern.compile('^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$');
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+    /**
+     * Send Email Method
+     */
+    public PageReference sendEmail() {
+
+        // Validate email
+        if (!isValidEmail(toAddress)) {
+            ApexPages.addMessage(
+                new ApexPages.Message(ApexPages.Severity.ERROR, 'Invalid Email Address!')
+            );
+            return null;
+        }
+
+        try {
+            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+
+            // Set email details
+            mail.setToAddresses(new String[] { toAddress });
+            mail.setSubject(subject);
+            mail.setPlainTextBody(body);
+
+            // Attachment (optional)
+            if (fileBody != null && fileName != null) {
+                Messaging.EmailFileAttachment attachment = new Messaging.EmailFileAttachment();
+                attachment.setFileName(fileName);
+                attachment.setBody(fileBody);
+                attachment.setContentType('application/octet-stream');
+
+                mail.setFileAttachments(new Messaging.EmailFileAttachment[] { attachment });
+            }
+
+            // Send email
+            Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+
+            ApexPages.addMessage(
+                new ApexPages.Message(ApexPages.Severity.CONFIRM, 'Email Sent Successfully!')
+            );
+
+        } catch (Exception e) {
+            ApexPages.addMessage(
+                new ApexPages.Message(ApexPages.Severity.ERROR, 'Error: ' + e.getMessage())
+            );
+        }
+
+        return null;
+    }
