@@ -20,7 +20,7 @@ Step 2 — Backend setup
 		pm2 status
 		pm2 logs project_name --lines 20
 		pm2 save
-		pm2 startup
+		pm2 startup // after this pm2 will give yoiu a cmd you just nedd to copy and paste the cmd
 
 Step 3 — Frontend setup
 	cd frontend
